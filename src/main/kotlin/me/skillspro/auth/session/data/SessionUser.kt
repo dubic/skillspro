@@ -6,8 +6,8 @@ import org.springframework.data.redis.core.TimeToLive
 
 @RedisHash("Session")
 class SessionUser (
-        @field:Id val token: String,
-        val name: String,
-        val email: String,
-        val verified: Boolean,
-        @field:TimeToLive val ttl: Long)
+        @field:Id var token: String,
+        var name: String,
+        var email: String,
+        var verified: Boolean,
+        @field:TimeToLive var ttl: Long)

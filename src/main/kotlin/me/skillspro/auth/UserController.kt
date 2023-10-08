@@ -1,4 +1,4 @@
-package me.skillspro.auth.session
+package me.skillspro.auth
 
 import me.skillspro.auth.UserService
 import me.skillspro.auth.dto.CreateUserRequest
@@ -14,17 +14,14 @@ import org.springframework.web.bind.annotation.RestController
 
 @RestController
 @RequestMapping("/users")
-class UserController(private val userService: UserService): BaseController() {
+class UserController(private val userService: UserService) : BaseController() {
     @PostMapping
     fun createAccount(@RequestBody createUserRequest: CreateUserRequest): Any {
         val user = User(
                 Name(createUserRequest.name),
                 Email(createUserRequest.email, false)
         )
-        val createdUser = this.userService.createAccount(
-                user,
-                Password(createUserRequest.password),
-        );
+        this.userService.createAccount(user, Password(createUserRequest.password))
         return object {
             val verified = user.isVerified()
         }

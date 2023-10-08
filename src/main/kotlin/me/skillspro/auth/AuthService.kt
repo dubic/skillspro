@@ -24,6 +24,7 @@ class AuthService(private val passwordService: PasswordService,
     }
 
     fun login(email: Email, password: Password): AuthResponse {
+        logger.info("Attempting authentication for : ${email.value}")
         val user = this.validateAccount(email, password)
         val authToken = this.createAuthenticationToken(user)
         this.sessionService.createSession(authToken, user)

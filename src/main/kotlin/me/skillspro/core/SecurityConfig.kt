@@ -18,8 +18,10 @@ class SecurityConfig {
 
     @Bean
     fun filterChain(http: HttpSecurity): SecurityFilterChain {
-        http.authorizeHttpRequests { it.requestMatchers("/**").permitAll() }
-        http.headers { h -> h.frameOptions { it.deny() } }
+        http
+                .csrf { it.disable() }
+                .authorizeHttpRequests { it.requestMatchers("/users", "/auth/**").permitAll() }
+                .headers { h -> h.frameOptions { it.deny() } }
         return http.build()
     }
 }

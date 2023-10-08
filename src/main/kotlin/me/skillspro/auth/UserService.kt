@@ -9,8 +9,9 @@ import me.skillspro.auth.models.User
 import org.slf4j.LoggerFactory
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.data.repository.findByIdOrNull
+import org.springframework.stereotype.Service
 import java.util.NoSuchElementException
-
+@Service
 class UserService(private val userRepo: UserRepo,
                   private val passwordService: PasswordService,
                   private val events: ApplicationEventPublisher) {
@@ -34,7 +35,7 @@ class UserService(private val userRepo: UserRepo,
         this.accountDoesNotExist(user.email)
         val createdUser = this.doCreateAccount(user, password)
         this.events.publishEvent(user)
-        return createdUser;
+        return createdUser
     }
 
     fun findAccount(email: Email): User {
