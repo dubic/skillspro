@@ -1,4 +1,4 @@
-package me.skillspro.core
+package me.skillspro.core.config
 
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -20,7 +20,8 @@ class SecurityConfig {
     fun filterChain(http: HttpSecurity): SecurityFilterChain {
         http
                 .csrf { it.disable() }
-                .authorizeHttpRequests { it.requestMatchers("/users", "/auth/**").permitAll() }
+                .authorizeHttpRequests { it.requestMatchers("/users",
+                        "/auth/**","/engagements/**").permitAll() }
                 .headers { h -> h.frameOptions { it.deny() } }
         return http.build()
     }

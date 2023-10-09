@@ -4,7 +4,7 @@ import me.skillspro.auth.models.Email
 import me.skillspro.auth.models.Name
 import me.skillspro.auth.models.User
 import me.skillspro.auth.session.data.SessionUser
-import me.skillspro.core.ConfigProperties
+import me.skillspro.core.config.ConfigProperties
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 

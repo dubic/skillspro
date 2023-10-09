@@ -22,9 +22,9 @@ class UserController(private val userService: UserService) : BaseController() {
                 Email(createUserRequest.email, false)
         )
         this.userService.createAccount(user, Password(createUserRequest.password))
-        return object {
+        return success(object {
             val verified = user.isVerified()
-        }
+        })
     }
 
 }
