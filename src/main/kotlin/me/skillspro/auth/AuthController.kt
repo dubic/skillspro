@@ -6,7 +6,6 @@ import me.skillspro.auth.models.Email
 import me.skillspro.auth.models.Password
 import me.skillspro.core.APIResponse
 import me.skillspro.core.BaseController
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
@@ -33,5 +32,11 @@ class AuthController(private val authService: AuthService) : BaseController() {
                 Email(loginRequest.email, null),
                 Password(loginRequest.password))
         return success(authResponse)
+    }
+
+    @PostMapping("/logout")
+    fun logout(): ResponseEntity<AuthResponse> {
+        this.authService.logout()
+        return ResponseEntity.ok().build()
     }
 }

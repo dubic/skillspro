@@ -6,10 +6,12 @@ import me.skillspro.auth.models.Email
 import me.skillspro.auth.models.Name
 import me.skillspro.auth.models.Password
 import me.skillspro.auth.models.User
+import me.skillspro.auth.verification.AccountVerifiedEvent
 import org.slf4j.LoggerFactory
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
+import java.lang.IllegalStateException
 import java.util.NoSuchElementException
 @Service
 class UserService(private val userRepo: UserRepo,
@@ -35,6 +37,7 @@ class UserService(private val userRepo: UserRepo,
         this.accountDoesNotExist(user.email)
         val createdUser = this.doCreateAccount(user, password)
         this.events.publishEvent(user)
+        this.logger.debug("created account successfully " + user.email.value)
         return createdUser
     }
 
@@ -42,5 +45,14 @@ class UserService(private val userRepo: UserRepo,
         val dbUser = this.userRepo.findByIdOrNull(email.value)
                 ?: throw NoSuchElementException("Not found: " + email.value)
         return User.from(dbUser)
+    }
+
+    fun validateAccount(email: Email) {
+        val foundUser = this.userRepo.findByIdOrNull(email.value)
+                ?: throw IllegalStateException("Account not found: ${email.value}")
+        foundUser.emailVerified = true
+        this.userRepo.save(foundUser)
+        this.events.publishEvent(AccountVerifiedEvent(User.from(foundUser)))
+        logger.info("Account verified successfully [${email.value}]")
     }
 }

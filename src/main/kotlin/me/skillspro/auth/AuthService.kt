@@ -47,5 +47,9 @@ class AuthService(private val passwordService: PasswordService,
         return UUID.randomUUID().toString()
     }
 
+    fun logout() {
+        TODO("Not yet implemented")
+    }
+
     private val logger = LoggerFactory.getLogger(javaClass)
 }

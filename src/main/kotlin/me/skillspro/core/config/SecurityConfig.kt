@@ -20,8 +20,10 @@ class SecurityConfig {
     fun filterChain(http: HttpSecurity): SecurityFilterChain {
         http
                 .csrf { it.disable() }
-                .authorizeHttpRequests { it.requestMatchers("/users",
-                        "/auth/**","/engagements/**").permitAll() }
+                .authorizeHttpRequests {
+                    it.requestMatchers("/users/**",
+                            "/auth/**", "/engagements/**", "/notification/**").permitAll()
+                }
                 .headers { h -> h.frameOptions { it.deny() } }
         return http.build()
     }

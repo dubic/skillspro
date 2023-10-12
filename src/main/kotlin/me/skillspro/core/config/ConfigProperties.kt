@@ -8,6 +8,8 @@ import org.springframework.stereotype.Component
 class ConfigProperties {
     val mongo = Mongo()
     var redisSessionTtlSecs: Long = 100
+    var redisTokenTtlSecs: Long = 100
+    var emailVerificationTopic: String = ""
     val redis = Redis()
 
     class Redis {
