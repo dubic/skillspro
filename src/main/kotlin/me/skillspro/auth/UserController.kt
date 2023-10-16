@@ -1,5 +1,6 @@
 package me.skillspro.auth
 
+import me.skillspro.auth.dto.AuthResponse
 import me.skillspro.auth.dto.CreateUserRequest
 import me.skillspro.auth.models.Email
 import me.skillspro.auth.models.Name
@@ -10,6 +11,7 @@ import me.skillspro.auth.verification.AccountVerificationService
 import me.skillspro.auth.verification.EmailVerificationRequest
 import me.skillspro.core.BaseController
 import me.skillspro.core.config.ConfigProperties
+import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
@@ -18,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 @RequestMapping("/users")
 class UserController(private val userService: UserService,
+                     private val authService: AuthService,
                      private val configProperties: ConfigProperties,
                      private val accountVerificationService: AccountVerificationService) : BaseController() {
     @PostMapping
@@ -34,10 +37,11 @@ class UserController(private val userService: UserService,
     }
 
     @PostMapping("/verify")
-    fun verify(@RequestBody verificationRequest: EmailVerificationRequest): Unit {
-        accountVerificationService.verifyEmail(
-                Email(verificationRequest.userId, null),
-                Token(verificationRequest.token))
+    fun verify(@RequestBody verificationRequest: EmailVerificationRequest): ResponseEntity<AuthResponse> {
+        val email = Email(verificationRequest.userId, null)
+        accountVerificationService.verifyEmail(email, Token(verificationRequest.token))
+        val authResponse = authService.authenticate(email)
+        return success(authResponse)
     }
 
 }

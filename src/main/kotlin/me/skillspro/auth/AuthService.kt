@@ -51,5 +51,13 @@ class AuthService(private val passwordService: PasswordService,
         TODO("Not yet implemented")
     }
 
+    fun authenticate(email: Email): AuthResponse {
+        val dbUser = userRepo.findByIdOrNull(email.value)
+        val user = User.from(dbUser!!)
+        val token = this.createAuthenticationToken(user)
+        this.sessionService.createSession(token, user)
+        return AuthResponse(token, Account(user.name.value, user.email.value, user.isVerified()))
+    }
+
     private val logger = LoggerFactory.getLogger(javaClass)
 }
