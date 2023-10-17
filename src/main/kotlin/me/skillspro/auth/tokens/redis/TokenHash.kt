@@ -16,10 +16,6 @@ data class TokenHash(
     @field:Id
     var id: String = createId(user, type)
 
-    init {
-        println("TOKEN ID ::: $id")
-    }
-
     companion object {
         fun createId(userId: String, type: String): String {
             return "${userId}_$type"

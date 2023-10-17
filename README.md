@@ -37,3 +37,15 @@ sequenceDiagram
     auth->>-uctrl: AuthResponse
     uctrl->>app: 200 AuthResponse
 ```
+
+## resend verification token
+```mermaid
+sequenceDiagram
+    participant app as app
+    participant uctrl as UserController
+    participant vs as AccountVerificationService
+    app->>+uctrl: POST /verify/resend
+    uctrl->>vs: resendVerification(email)
+    vs->>vs: createTokenAndSend(user)
+    uctrl->>app: 200
+```

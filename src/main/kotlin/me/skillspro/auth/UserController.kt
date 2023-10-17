@@ -11,7 +11,10 @@ import me.skillspro.auth.verification.AccountVerificationService
 import me.skillspro.auth.verification.EmailVerificationRequest
 import me.skillspro.core.BaseController
 import me.skillspro.core.config.ConfigProperties
+import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
@@ -44,4 +47,9 @@ class UserController(private val userService: UserService,
         return success(authResponse)
     }
 
+    @GetMapping("/verify/resend/{email}")
+    fun resendVerificationToken(@PathVariable("email") email: String): ResponseEntity<Unit>{
+        this.accountVerificationService.resendVerification(Email(email, null))
+        return ResponseEntity.ok().build()
+    }
 }

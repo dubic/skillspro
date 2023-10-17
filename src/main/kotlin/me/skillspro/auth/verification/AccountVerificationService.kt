@@ -45,4 +45,9 @@ class AccountVerificationService(private val tokenService: TokenService,
         }
         this.userService.validateAccount(email)
     }
+
+    fun resendVerification(email: Email) {
+        logger.debug("resending verification token [{}]", email.value)
+        userService.findAccount(email).also(this::createTokenAndSend)
+    }
 }
