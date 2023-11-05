@@ -2,6 +2,7 @@ package me.skillspro.auth
 
 import me.skillspro.auth.dto.AuthResponse
 import me.skillspro.auth.dto.CreateUserRequest
+import me.skillspro.auth.dto.CreateUserResponse
 import me.skillspro.auth.models.Email
 import me.skillspro.auth.models.Name
 import me.skillspro.auth.models.Password
@@ -24,19 +25,15 @@ import org.springframework.web.bind.annotation.RestController
 @RequestMapping("/users")
 class UserController(private val userService: UserService,
                      private val authService: AuthService,
-                     private val configProperties: ConfigProperties,
                      private val accountVerificationService: AccountVerificationService) : BaseController() {
     @PostMapping
-    fun createAccount(@RequestBody createUserRequest: CreateUserRequest): Any {
+    fun createAccount(@RequestBody createUserRequest: CreateUserRequest): ResponseEntity<CreateUserResponse> {
         val user = User(
                 Name(createUserRequest.name),
                 Email(createUserRequest.email, false)
         )
-        this.userService.createAccount(user, Password(createUserRequest.password))
-        return success(object {
-            val verified = user.isVerified()
-            val tokenTtlSecs = configProperties.redisTokenTtlSecs
-        })
+        val createUserResponse = this.userService.createAccount(user, Password(createUserRequest.password))
+        return success(createUserResponse)
     }
 
     @PostMapping("/verify")
@@ -48,7 +45,7 @@ class UserController(private val userService: UserService,
     }
 
     @GetMapping("/verify/resend/{email}")
-    fun resendVerificationToken(@PathVariable("email") email: String): ResponseEntity<Unit>{
+    fun resendVerificationToken(@PathVariable("email") email: String): ResponseEntity<Unit> {
         this.accountVerificationService.resendVerification(Email(email, null))
         return ResponseEntity.ok().build()
     }

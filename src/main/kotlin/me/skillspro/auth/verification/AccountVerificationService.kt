@@ -33,15 +33,16 @@ class AccountVerificationService(private val tokenService: TokenService,
     fun createTokenAndSend(user: User) {
         val token = this.tokenService.createToken(TokenRequest(user.email, TokenType.ACCOUNT_VERIFICATION))
         this.events.publishEvent(
-                NotificationEvent(user.email.value, configProperties.emailVerificationTopic,
-                mapOf("token" to token.value))
+                NotificationEvent(user.email.value, "mail.verification", configProperties
+                        .emailVerificationSubject,
+                        mapOf("token" to token.value))
         )
     }
 
     fun verifyEmail(email: Email, token: Token) {
         val tokenValid = this.tokenService.isTokenValid(email, token, TokenType.ACCOUNT_VERIFICATION)
-        if (!tokenValid){
-            throw IllegalArgumentException("Token is invalid")
+        if (!tokenValid) {
+            throw IllegalArgumentException("Token is invalid: " + email.value)
         }
         this.userService.validateAccount(email)
     }

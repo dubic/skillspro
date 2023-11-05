@@ -6,10 +6,11 @@ import org.springframework.stereotype.Component
 @Component
 @ConfigurationProperties("sp")
 class ConfigProperties {
+    val mail = Mail()
     val mongo = Mongo()
     var redisSessionTtlSecs: Long = 100
     var redisTokenTtlSecs: Long = 100
-    var emailVerificationTopic: String = ""
+    var emailVerificationSubject: String = ""
     val redis = Redis()
 
     class Redis {
@@ -20,5 +21,10 @@ class ConfigProperties {
     class Mongo{
         var dbName = "skillspro"
         var url = ""
+    }
+
+    class Mail{
+        var sender = "dubisoft.tech@gmail.com"
+        var senderName = "Dubisoft Tech"
     }
 }

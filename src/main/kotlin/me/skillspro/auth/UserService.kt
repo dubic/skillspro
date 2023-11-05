@@ -2,11 +2,13 @@ package me.skillspro.auth
 
 import me.skillspro.auth.dao.DBUser
 import me.skillspro.auth.dao.UserRepo
+import me.skillspro.auth.dto.CreateUserResponse
 import me.skillspro.auth.models.Email
 import me.skillspro.auth.models.Name
 import me.skillspro.auth.models.Password
 import me.skillspro.auth.models.User
 import me.skillspro.auth.verification.AccountVerifiedEvent
+import me.skillspro.core.config.ConfigProperties
 import org.slf4j.LoggerFactory
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.data.repository.findByIdOrNull
@@ -16,6 +18,7 @@ import java.util.NoSuchElementException
 @Service
 class UserService(private val userRepo: UserRepo,
                   private val passwordService: PasswordService,
+                  private val configProperties: ConfigProperties,
                   private val events: ApplicationEventPublisher) {
     private val logger = LoggerFactory.getLogger(javaClass)
 
@@ -32,13 +35,13 @@ class UserService(private val userRepo: UserRepo,
         this.userRepo.save(DBUser(user.name.value, user.email.value, hashed, user.isVerified()))
     }
 
-    fun createAccount(user: User, password: Password) {
+    fun createAccount(user: User, password: Password): CreateUserResponse {
         this.logger.debug("create account request " + user.email.value)
         this.accountDoesNotExist(user.email)
-        val createdUser = this.doCreateAccount(user, password)
+        this.doCreateAccount(user, password)
         this.events.publishEvent(user)
         this.logger.debug("created account successfully " + user.email.value)
-        return createdUser
+        return CreateUserResponse(user.isVerified(), configProperties.redisTokenTtlSecs)
     }
 
     fun findAccount(email: Email): User {
