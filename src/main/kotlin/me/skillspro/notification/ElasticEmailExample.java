@@ -17,7 +17,7 @@ public class ElasticEmailExample {
 
         // Configure API key authorization: apikey
         ApiKeyAuth apikey = (ApiKeyAuth) defaultClient.getAuthentication("apikey");
-        apikey.setApiKey("E17A7F808313F28289DC94F3F3C6A58306FD016F6547279EFD1525E0F633FC16889FC704933AB1EF8A109E4B84FE363B");
+        apikey.setApiKey("");
         // Uncomment the following line to set a prefix for the API key, e.g. "Token" (defaults to null)
         //apikey.setApiKeyPrefix("Token");
 

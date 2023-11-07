@@ -26,6 +26,12 @@ class AccountVerificationService(private val tokenService: TokenService,
     @Async
     @EventListener
     fun userCreated(user: User) {
+        if (user.isVerified()) {
+            logger.info("Event :: user created and is verified :: verification :: ${
+                user.email.value
+            }")
+            return
+        }
         logger.info("Event :: user created :: verification :: ${user.email.value}")
         this.createTokenAndSend(user)
     }

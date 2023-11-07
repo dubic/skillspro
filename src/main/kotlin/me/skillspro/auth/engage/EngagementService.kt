@@ -37,7 +37,7 @@ class EngagementService(private val engagementRepo: EngagementRepo) {
     }
 
     private fun accountCreatedEngagement(user: User) {
-        this.engagementRepo.save(Engagement(user.email.value))
+        this.engagementRepo.save(Engagement(user.email.value, user.isVerified()))
         logger.info("user created engagement saved for : ${user.email.value}")
     }
 

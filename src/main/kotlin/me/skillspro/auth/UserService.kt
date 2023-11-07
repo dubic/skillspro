@@ -3,6 +3,8 @@ package me.skillspro.auth
 import me.skillspro.auth.dao.DBUser
 import me.skillspro.auth.dao.UserRepo
 import me.skillspro.auth.dto.CreateUserResponse
+import me.skillspro.auth.dto.SocialLoginRequest
+import me.skillspro.auth.firebase.FirebaseService
 import me.skillspro.auth.models.Email
 import me.skillspro.auth.models.Name
 import me.skillspro.auth.models.Password
@@ -15,11 +17,13 @@ import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import java.lang.IllegalStateException
 import java.util.NoSuchElementException
+
 @Service
 class UserService(private val userRepo: UserRepo,
                   private val passwordService: PasswordService,
                   private val configProperties: ConfigProperties,
-                  private val events: ApplicationEventPublisher) {
+                  private val events: ApplicationEventPublisher,
+                  private val firebaseService: FirebaseService) {
     private val logger = LoggerFactory.getLogger(javaClass)
 
     private fun accountDoesNotExist(email: Email) {
@@ -57,5 +61,19 @@ class UserService(private val userRepo: UserRepo,
         this.userRepo.save(foundUser)
         this.events.publishEvent(AccountVerifiedEvent(User.from(foundUser)))
         logger.info("Account verified successfully [${email.value}]")
+    }
+
+    fun getOrCreateUser(socialLoginRequest: SocialLoginRequest): User {
+        val googleAccount = firebaseService.verifyAccount(socialLoginRequest.idToken)
+        logger.debug("Account verified: {}", googleAccount)
+        var dbUser = userRepo.findByIdOrNull(googleAccount.email)
+        if (dbUser != null) {
+            return User.from(dbUser)
+        }
+        //create profile
+        dbUser = userRepo.save(DBUser(googleAccount.displayName, googleAccount.email, null, true))
+        val user = User.from(dbUser)
+        this.events.publishEvent(user)
+        return user
     }
 }

@@ -2,6 +2,7 @@ package me.skillspro.auth
 
 import me.skillspro.auth.dto.AuthResponse
 import me.skillspro.auth.dto.LoginRequest
+import me.skillspro.auth.dto.SocialLoginRequest
 import me.skillspro.auth.models.Email
 import me.skillspro.auth.models.Password
 import me.skillspro.core.APIResponse
@@ -39,4 +40,8 @@ class AuthController(private val authService: AuthService) : BaseController() {
         this.authService.logout()
         return ResponseEntity.ok().build()
     }
+
+    @PostMapping("/social/login")
+    fun loginSocial(@RequestBody socialLoginRequest: SocialLoginRequest): ResponseEntity<AuthResponse> =
+            success(authService.loginSocial(socialLoginRequest))
 }

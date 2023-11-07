@@ -18,7 +18,7 @@ public class SendgridExample {
         Content content = new Content("text/html", "Welcome to skillspro");
         Mail mail = new Mail(from, subject, to, content);
 
-        SendGrid sg = new SendGrid("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");
+        SendGrid sg = new SendGrid("");
         Request request = new Request();
         try {
             request.setMethod(Method.POST);
