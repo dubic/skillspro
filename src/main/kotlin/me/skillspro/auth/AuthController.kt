@@ -44,4 +44,10 @@ class AuthController(private val authService: AuthService) : BaseController() {
     @PostMapping("/social/login")
     fun loginSocial(@RequestBody socialLoginRequest: SocialLoginRequest): ResponseEntity<AuthResponse> =
             success(authService.loginSocial(socialLoginRequest))
+
+    @GetMapping("/forgot-password/{email}")
+    fun forgotPassword(@PathVariable email: String): ResponseEntity<Any> {
+        this.authService.forgotPassword(Email(email, null))
+        return ResponseEntity.ok().build()
+    }
 }

@@ -25,4 +25,10 @@ class RestExceptionHandler {
         logger.error(e.message)
         return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, e.message!!)
     }
+
+    @ExceptionHandler(NoSuchElementException::class)
+    fun handleNoSuchElementException(e: NoSuchElementException): ProblemDetail {
+        logger.error(e.message)
+        return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, e.message!!)
+    }
 }

@@ -50,7 +50,7 @@ class UserService(private val userRepo: UserRepo,
 
     fun findAccount(email: Email): User {
         val dbUser = this.userRepo.findByIdOrNull(email.value)
-                ?: throw NoSuchElementException("Not found: " + email.value)
+                ?: throw NoSuchElementException("Account not found: " + email.value)
         return User.from(dbUser)
     }
 

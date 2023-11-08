@@ -28,5 +28,4 @@ fun firebase(){
 
 	val app = FirebaseApp.initializeApp(options)
 	println("Firebase app ::: ${app.name}")
-	println("Firebase app project ::: ${app.options.projectId}")
 }

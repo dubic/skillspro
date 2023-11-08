@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component
 @Component
 @ConfigurationProperties("sp")
 class ConfigProperties {
+    var passwordForgotSubject = ""
     val mail = Mail()
     val mongo = Mongo()
     var redisSessionTtlSecs: Long = 100
