@@ -23,10 +23,10 @@ class RedisTokenService(private val tokenRepo: RedisTokenRepo,
         return this.saveNewToken(tokenRequest)
     }
 
-    private fun deleteExistingToken(userId: String, type: TokenType) {
+    override fun deleteExistingToken(userId: String, type: TokenType) {
         val foundToken = this.tokenRepo.findByIdOrNull(TokenHash.createId(userId, type.name))
         if (foundToken != null) {
-            logger.warn("found token of ${foundToken.id} for $userId")
+            logger.debug("found token of ${foundToken.id} for $userId")
             this.tokenRepo.delete(foundToken)
         }
     }

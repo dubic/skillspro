@@ -9,16 +9,12 @@ import me.skillspro.core.APIResponse
 import me.skillspro.core.BaseController
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 
 @RestController
 @RequestMapping("/auth")
-class AuthController(private val authService: AuthService) : BaseController() {
+class AuthController(private val authService: AuthService) :
+        BaseController() {
     @GetMapping("/valid/{token}")
     fun validAuthToken(@PathVariable token: String): ResponseEntity<APIResponse<Any?>> {
         if (!this.authService.isAuthenticationValid(token)) {
@@ -44,10 +40,4 @@ class AuthController(private val authService: AuthService) : BaseController() {
     @PostMapping("/social/login")
     fun loginSocial(@RequestBody socialLoginRequest: SocialLoginRequest): ResponseEntity<AuthResponse> =
             success(authService.loginSocial(socialLoginRequest))
-
-    @GetMapping("/forgot-password/{email}")
-    fun forgotPassword(@PathVariable email: String): ResponseEntity<Any> {
-        this.authService.forgotPassword(Email(email, null))
-        return ResponseEntity.ok().build()
-    }
 }

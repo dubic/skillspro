@@ -3,6 +3,7 @@ package me.skillspro.auth
 import me.skillspro.auth.dto.AuthResponse
 import me.skillspro.auth.dto.CreateUserRequest
 import me.skillspro.auth.dto.CreateUserResponse
+import me.skillspro.auth.dto.PasswordResetRequest
 import me.skillspro.auth.models.Email
 import me.skillspro.auth.models.Name
 import me.skillspro.auth.models.Password
@@ -47,6 +48,21 @@ class UserController(private val userService: UserService,
     @GetMapping("/verify/resend/{email}")
     fun resendVerificationToken(@PathVariable("email") email: String): ResponseEntity<Unit> {
         this.accountVerificationService.resendVerification(Email(email, null))
+        return ResponseEntity.ok().build()
+    }
+
+    @GetMapping("/forgot-password/{email}")
+    fun forgotPassword(@PathVariable email: String): ResponseEntity<Any> {
+        this.userService.forgotPassword(Email(email, null))
+        return ResponseEntity.ok().build()
+    }
+
+    @PostMapping("/reset-password")
+    fun resetPassword(@RequestBody passwordResetRequest: PasswordResetRequest): ResponseEntity<Any> {
+        val email = Email(passwordResetRequest.email, null)
+        val password = Password(passwordResetRequest.newPassword)
+        val token = Token(passwordResetRequest.token)
+        this.userService.verifyTokenAndResetPassword(email, password, token)
         return ResponseEntity.ok().build()
     }
 }

@@ -51,6 +51,7 @@ class AccountVerificationService(private val tokenService: TokenService,
             throw IllegalArgumentException("Token is invalid: " + email.value)
         }
         this.userService.validateAccount(email)
+        tokenService.deleteExistingToken(email.value, TokenType.ACCOUNT_VERIFICATION)
     }
 
     fun resendVerification(email: Email) {

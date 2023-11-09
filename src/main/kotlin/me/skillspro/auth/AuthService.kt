@@ -8,26 +8,17 @@ import me.skillspro.auth.models.Email
 import me.skillspro.auth.models.Password
 import me.skillspro.auth.models.User
 import me.skillspro.auth.session.SessionService
-import me.skillspro.auth.tokens.TokenService
-import me.skillspro.auth.tokens.models.TokenRequest
-import me.skillspro.auth.tokens.models.TokenType
-import me.skillspro.core.config.ConfigProperties
-import me.skillspro.core.data.NotificationEvent
 import org.slf4j.LoggerFactory
-import org.springframework.context.ApplicationEventPublisher
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.security.authentication.BadCredentialsException
 import org.springframework.stereotype.Service
 import java.util.*
 
 @Service
-class AuthService(private val passwordService: PasswordService,
-                  private val sessionService: SessionService,
-                  private val userRepo: UserRepo,
-                  private val userService: UserService,
-                  private val events: ApplicationEventPublisher,
-                  private val configProperties: ConfigProperties,
-                  private val tokenService: TokenService) {
+class AuthService(
+        private val sessionService: SessionService,
+        private val userRepo: UserRepo,
+        private val userService: UserService) {
     fun isAuthenticationValid(token: String): Boolean {
         return sessionService.userInSession(token) != null
     }
@@ -52,7 +43,7 @@ class AuthService(private val passwordService: PasswordService,
                     " it. Kindly login with Google")
         }
 
-        if (!passwordService.compare(password, dbUser.password!!)) {
+        if (!userService.comparePassword(password, dbUser.password!!)) {
             this.logger.warn("wrong credentials password" + email.value)
             throw BadCredentialsException("wrong credentials")
         }
@@ -82,18 +73,6 @@ class AuthService(private val passwordService: PasswordService,
     fun loginSocial(socialLoginRequest: SocialLoginRequest): AuthResponse {
         val user = userService.getOrCreateUser(socialLoginRequest)
         return createAuthenticationSession(user)
-    }
-
-    fun forgotPassword(email: Email) {
-        logger.debug("Starting password reset process :: {}", email.value)
-        val user = userService.findAccount(email)
-        val createdToken = tokenService.createToken(TokenRequest(email, TokenType.PASSWORD))
-        this.events.publishEvent(
-                NotificationEvent(user.email.value, "mail.password", configProperties
-                        .passwordForgotSubject,
-                        mapOf("token" to createdToken.value,
-                                "name" to user.name.value))
-        )
     }
 
     private val logger = LoggerFactory.getLogger(javaClass)

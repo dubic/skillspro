@@ -8,4 +8,5 @@ import me.skillspro.auth.tokens.models.TokenType
 interface TokenService {
      fun createToken(tokenRequest: TokenRequest): Token
      fun isTokenValid(email: Email, token: Token, type: TokenType): Boolean
+     fun deleteExistingToken(userId: String, type: TokenType)
 }
