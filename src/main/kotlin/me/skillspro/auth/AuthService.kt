@@ -8,6 +8,7 @@ import me.skillspro.auth.models.Email
 import me.skillspro.auth.models.Password
 import me.skillspro.auth.models.User
 import me.skillspro.auth.session.SessionService
+import me.skillspro.auth.verification.AccountVerificationService
 import org.slf4j.LoggerFactory
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.security.authentication.BadCredentialsException
@@ -18,6 +19,7 @@ import java.util.*
 class AuthService(
         private val sessionService: SessionService,
         private val userRepo: UserRepo,
+        private val verificationService: AccountVerificationService,
         private val userService: UserService) {
     fun isAuthenticationValid(token: String): Boolean {
         return sessionService.userInSession(token) != null
@@ -26,6 +28,11 @@ class AuthService(
     fun login(email: Email, password: Password): AuthResponse {
         logger.info("Attempting authentication for : ${email.value}")
         val user = this.validateAccount(email, password)
+        if (!user.isVerified()) {
+            logger.warn("Attempted login with unverified account: [{}]", user.email.value)
+            this.verificationService.resendVerification(user.email)
+            return AuthResponse("", Account(user.name.value, user.email.value, user.isVerified()))
+        }
         val authToken = this.createAuthenticationToken(user)
         this.sessionService.createSession(authToken, user)
         return AuthResponse(authToken, Account(user.name.value, user.email.value, user.isVerified()))
