@@ -19,6 +19,9 @@ class ConfigProperties {
         var loginTimeWindowSecs: Long = 60
         var loginMaxRequests: Long = 10
         var loginTimeWindowBlockedSecs: Long = 3600
+        var passwordResetMaxRequests: Long = 30
+        var passwordResetTimeWindowSecs: Long = 30
+        var passwordResetTimeWindowBlockedSecs: Long = 5 * 60
     }
 
     class Redis {
@@ -26,12 +29,12 @@ class ConfigProperties {
         var port = 0
     }
 
-    class Mongo{
+    class Mongo {
         var dbName = "skillspro"
         var url = ""
     }
 
-    class Mail{
+    class Mail {
         var sender = "dubisoft.tech@gmail.com"
         var senderName = "Dubisoft Tech"
     }

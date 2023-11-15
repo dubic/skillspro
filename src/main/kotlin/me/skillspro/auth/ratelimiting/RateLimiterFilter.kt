@@ -6,6 +6,7 @@ import jakarta.servlet.http.HttpServletResponse
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import org.springframework.web.filter.OncePerRequestFilter
+
 @Component
 class RateLimiterFilter(private val rateLimiterService: RateLimiterService) : OncePerRequestFilter() {
     private val log = LoggerFactory.getLogger(javaClass)
@@ -14,7 +15,7 @@ class RateLimiterFilter(private val rateLimiterService: RateLimiterService) : On
         val rateLimitRequest = getIPAndDomain(request)
         val canProceed = this.rateLimiterService.canProceed(rateLimitRequest)
         log.debug("Can proceed ::: {} ::: {}", rateLimitRequest.ip, canProceed)
-        if (!canProceed){
+        if (!canProceed) {
             response.status = 429
             response.writer.write("Too many requests")
             response.writer.flush()
@@ -25,14 +26,19 @@ class RateLimiterFilter(private val rateLimiterService: RateLimiterService) : On
     }
 
     private fun getIPAndDomain(request: HttpServletRequest): RateLimitRequest {
-        if (request.servletPath.matches("/auth/login".toRegex())){
-            return RateLimitRequest(request.remoteAddr , request.servletPath)
+        val path = request.servletPath
+        if (path.matches("/auth/login".toRegex())) {
+            return RateLimitRequest(request.remoteAddr, RateLimitType.LOGIN)
         }
-        throw IllegalStateException("Rate limit filter should not filter: ${request.servletPath}")
+        if (path.matches("/users/reset-password".toRegex())) {
+            return RateLimitRequest(request.remoteAddr, RateLimitType.PASSWORD_RESET)
+        }
+        throw IllegalStateException("Rate limit filter should not filter: $path")
     }
 
     override fun shouldNotFilter(request: HttpServletRequest): Boolean {
         val path = request.servletPath
-        return !path.matches("/auth/login".toRegex())
+        return !(path.matches("/auth/login".toRegex())
+                || path.matches("/users/reset-password".toRegex()))
     }
 }

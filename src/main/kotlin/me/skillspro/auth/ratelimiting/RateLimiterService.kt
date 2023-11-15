@@ -14,7 +14,7 @@ class RateLimiterService(private val redisRateLimiterStorage: RedisRateLimiterSt
             return false
         }
         val timeWindowCount = incrementTimeWindowCounter(request)
-        if (timeWindowCount >= getMaxRequests(request)) {
+        if (timeWindowCount >= request.getMaxRequests(configProperties)) {
             block(request)
             return false
         }
@@ -23,16 +23,17 @@ class RateLimiterService(private val redisRateLimiterStorage: RedisRateLimiterSt
 
     private fun block(request: RateLimitRequest) {
         val key = getBlockKey(request)
-        this.redisRateLimiterStorage.block(key, getTimeWindowBlockedSeconds(request))
-        log.warn("blocked for {}: [{}]", request.limitFor, request.ip)
+        this.redisRateLimiterStorage.block(key, request.getTimeWindowBlockedSeconds(configProperties))
+        log.warn("blocked for {}: [{}]", request.type, request.ip)
     }
 
-    private fun getBlockKey(request: RateLimitRequest) = "rate_${request.limitFor.lowercase()}_blocked_${request.ip}"
+    private fun getBlockKey(request: RateLimitRequest)
+    = "rate_${request.type.name.lowercase()}_blocked_${request.ip}"
 
     private fun incrementTimeWindowCounter(request: RateLimitRequest): Long {
-        val key = "rate_${request.limitFor.lowercase()}_counter_${request.ip}"
+        val key = "rate_${request.type.name.lowercase()}_counter_${request.ip}"
         val current = redisRateLimiterStorage.incrementAndExpire(key,
-                getTimeWindowCounterSeconds(request))
+                request.getTimeWindowCounterSeconds(configProperties))
         log.debug("Value $key ::: $current")
         return current
     }
@@ -41,32 +42,5 @@ class RateLimiterService(private val redisRateLimiterStorage: RedisRateLimiterSt
         val key = getBlockKey(request)
         val blockedStatus = this.redisRateLimiterStorage.getBlockedStratus(key)
         return blockedStatus != null
-    }
-
-    private fun getTimeWindowBlockedSeconds(request: RateLimitRequest): Long {
-        if (request.isLogin()) {
-            return configProperties.rate.loginTimeWindowBlockedSecs
-        }
-        log.warn("Rate limiter type not detected. returning blocked login config for {}", request
-                .limitFor)
-        return configProperties.rate.loginTimeWindowBlockedSecs
-    }
-
-    private fun getTimeWindowCounterSeconds(request: RateLimitRequest): Long {
-        if (request.isLogin()) {
-            return configProperties.rate.loginTimeWindowSecs
-        }
-        log.warn("Rate limiter type not detected. returning counter login config for {}", request
-                .limitFor)
-        return configProperties.rate.loginTimeWindowSecs
-    }
-
-    private fun getMaxRequests(request: RateLimitRequest): Long {
-        if (request.isLogin()) {
-            return configProperties.rate.loginMaxRequests
-        }
-        log.warn("Rate limiter type not detected. returning max requests login config for {}",
-                request.limitFor)
-        return configProperties.rate.loginMaxRequests
     }
 }
