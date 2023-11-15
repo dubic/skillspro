@@ -1,10 +1,28 @@
 package me.skillspro.auth.tokens.redis
 
-import org.springframework.data.repository.CrudRepository
-import org.springframework.data.repository.query.QueryByExampleExecutor
-import org.springframework.stereotype.Repository
+import org.springframework.stereotype.Service
+import redis.clients.jedis.JedisPool
 
-@Repository
-interface RedisTokenRepo: CrudRepository<TokenHash, String>, QueryByExampleExecutor<TokenHash> {
-//    fun findByUserAndType(user: String, type: String): List<TokenHash>
+@Service
+class RedisTokenRepo(private val jedisPool: JedisPool) {
+    fun findByIdOrNull(id: String): TokenHash? {
+        jedisPool.resource.use {
+            val map = it.hgetAll(id)
+            val ttl = it.ttl(id)
+            return TokenHash.fromMap(map, ttl)
+        }
+    }
+
+    fun delete(tokenHash: TokenHash) {
+        jedisPool.resource.use {
+            it.del(tokenHash.id)
+        }
+    }
+
+    fun save(tokenHash: TokenHash, ttl: Long) {
+        jedisPool.resource.use {
+            it.hset(tokenHash.id, tokenHash.toMap())
+            it.expire(tokenHash.id, ttl)
+        }
+    }
 }

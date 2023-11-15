@@ -16,18 +16,16 @@ class RedisSessionService(
     private val logger = LoggerFactory.getLogger(javaClass)
     override fun createSession(token: String, user: User) {
         repo.save(SessionUser(token, user.name.value, user.email.value,
-                user.isVerified(),
-                configProperties.redisSessionTtlSecs))
+                user.isVerified()), configProperties.redisSessionTtlSecs)
         logger.info("Session created for [${user.email.value}]")
     }
 
     override fun userInSession(token: String): User? {
-        return try {
-            val s = repo.findById(token).get()
-            User(Name(s.name), Email(s.email, s.verified))
-        } catch (ex: NoSuchElementException) {
+        val s = repo.findById(token)
+        if (s == null) {
             logger.warn("Session not found with token [...]")
-            null
+            return null
         }
+        return User(Name(s.name), Email(s.email, s.verified))
     }
 }

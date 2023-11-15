@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component
 @Component
 @ConfigurationProperties("sp")
 class ConfigProperties {
+    var rate = RateLimiter()
     var passwordForgotSubject = ""
     val mail = Mail()
     val mongo = Mongo()
@@ -13,6 +14,12 @@ class ConfigProperties {
     var redisTokenTtlSecs: Long = 100
     var emailVerificationSubject: String = ""
     val redis = Redis()
+
+    class RateLimiter {
+        var loginTimeWindowSecs: Long = 60
+        var loginMaxRequests: Long = 10
+        var loginTimeWindowBlockedSecs: Long = 3600
+    }
 
     class Redis {
         var host: String = ""

@@ -8,10 +8,8 @@ import me.skillspro.auth.tokens.redis.RedisTokenRepo
 import me.skillspro.auth.tokens.redis.TokenHash
 import me.skillspro.core.config.ConfigProperties
 import org.slf4j.LoggerFactory
-import org.springframework.data.repository.findByIdOrNull
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
-import java.util.stream.Collectors
 
 @Service
 class RedisTokenService(private val tokenRepo: RedisTokenRepo,
@@ -35,7 +33,7 @@ class RedisTokenService(private val tokenRepo: RedisTokenRepo,
     private fun saveNewToken(tokenRequest: TokenRequest): Token {
         val token = tokenRequest.generateToken()
         this.tokenRepo.save(TokenHash(passwordEncoder.encode(token.value), tokenRequest.userId,
-                tokenRequest.type.name, configProperties.redisTokenTtlSecs))
+                tokenRequest.type.name), configProperties.redisTokenTtlSecs)
         return token
     }
 
@@ -47,8 +45,4 @@ class RedisTokenService(private val tokenRepo: RedisTokenRepo,
         }
         return false
     }
-
-    fun getUserTokens(user: String, type: String) = this.tokenRepo
-            .findById(TokenHash.createId(user, type))
-            .map { mapOf("user" to it.user, "type" to it.type, "ttl" to it.ttl) }.get()
 }
