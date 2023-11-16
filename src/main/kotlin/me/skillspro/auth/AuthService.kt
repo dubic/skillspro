@@ -61,9 +61,7 @@ class AuthService(
         return UUID.randomUUID().toString()
     }
 
-    fun logout() {
-        TODO("Not yet implemented")
-    }
+    fun logout(credentials: String) = sessionService.deleteSession(credentials)
 
     fun authenticate(email: Email): AuthResponse {
         val dbUser = userRepo.findByIdOrNull(email.value)

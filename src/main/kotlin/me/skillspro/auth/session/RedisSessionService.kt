@@ -28,4 +28,8 @@ class RedisSessionService(
         }
         return User(Name(s.name), Email(s.email, s.verified))
     }
+
+    override fun deleteSession(token: String) {
+        repo.delete(token)
+    }
 }

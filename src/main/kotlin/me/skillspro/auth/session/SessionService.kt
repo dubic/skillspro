@@ -6,4 +6,5 @@ interface SessionService {
     fun createSession(token: String, user: User)
 
     fun userInSession(token: String): User?
+    fun deleteSession(token: String)
 }

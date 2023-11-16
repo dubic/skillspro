@@ -6,7 +6,7 @@ import org.springframework.stereotype.Service
 import redis.clients.jedis.JedisPool
 
 @Service
-class RedisSessionRepo (private val jedisPool: JedisPool){
+class RedisSessionRepo(private val jedisPool: JedisPool) {
     fun save(sessionUser: SessionUser, ttl: Long) {
         jedisPool.resource.use {
             it.hset(sessionUser.id(), sessionUser.toMap())
@@ -20,6 +20,12 @@ class RedisSessionRepo (private val jedisPool: JedisPool){
             val map = it.hgetAll(id)
             val ttl = it.ttl(id)
             return SessionUser.fromMap(map, ttl)
+        }
+    }
+
+    fun delete(token: String) {
+        jedisPool.resource.use {
+            it.del(SessionUser.id(token))
         }
     }
 }
