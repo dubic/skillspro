@@ -4,7 +4,9 @@ import me.skillspro.auth.dao.DBUser
 import me.skillspro.auth.dao.UserRepo
 import me.skillspro.auth.dto.CreateUserResponse
 import me.skillspro.auth.dto.SocialLoginRequest
+import me.skillspro.auth.engage.data.ProfilePhotoEvent
 import me.skillspro.auth.firebase.FirebaseService
+import me.skillspro.auth.firebase.GoogleAccount
 import me.skillspro.auth.models.Email
 import me.skillspro.auth.models.Password
 import me.skillspro.auth.models.User
@@ -15,11 +17,13 @@ import me.skillspro.auth.tokens.models.TokenType
 import me.skillspro.auth.verification.AccountVerifiedEvent
 import me.skillspro.core.config.ConfigProperties
 import me.skillspro.core.data.NotificationEvent
+import me.skillspro.core.storage.StorageService
 import org.slf4j.LoggerFactory
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
+import org.springframework.web.multipart.MultipartFile
 
 @Service
 class UserService(private val userRepo: UserRepo,
@@ -27,7 +31,8 @@ class UserService(private val userRepo: UserRepo,
                   private val events: ApplicationEventPublisher,
                   private val passwordEncoder: PasswordEncoder,
                   private val tokenService: TokenService,
-                  private val firebaseService: FirebaseService) {
+                  private val firebaseService: FirebaseService,
+                  private val storageService: StorageService) {
     private val logger = LoggerFactory.getLogger(javaClass)
 
     private fun accountDoesNotExist(email: Email) {
@@ -40,7 +45,8 @@ class UserService(private val userRepo: UserRepo,
 
     private fun doCreateAccount(user: User, password: Password) {
         val hashed = this.hashPassword(password)
-        this.userRepo.save(DBUser(user.name.value, user.email.value, hashed, user.isVerified()))
+        this.userRepo.save(DBUser(user.name.value, user.email.value, hashed, user.isVerified(),
+                user.photoUrl))
     }
 
     fun createAccount(user: User, password: Password): CreateUserResponse {
@@ -58,6 +64,11 @@ class UserService(private val userRepo: UserRepo,
         return User.from(dbUser)
     }
 
+    fun findDbUser(email: Email): DBUser {
+        return userRepo.findByIdOrNull(email.value)
+                ?: throw NoSuchElementException("Account not found: " + email.value)
+    }
+
     fun validateAccount(email: Email) {
         val foundUser = this.userRepo.findByIdOrNull(email.value)
                 ?: throw IllegalStateException("Account not found: ${email.value}")
@@ -72,13 +83,23 @@ class UserService(private val userRepo: UserRepo,
         logger.debug("Account verified: {}", googleAccount)
         var dbUser = userRepo.findByIdOrNull(googleAccount.email)
         if (dbUser != null) {
-            return User.from(dbUser)
+            return this.saveGoogleAccountDetails(dbUser, googleAccount)
         }
         //create profile
-        dbUser = userRepo.save(DBUser(googleAccount.displayName, googleAccount.email, null, true))
+        dbUser = userRepo.save(DBUser(googleAccount.displayName, googleAccount.email, null,
+                true, googleAccount.photoUrl))
         val user = User.from(dbUser)
         this.events.publishEvent(user)
         return user
+    }
+
+    private fun saveGoogleAccountDetails(dbUser: DBUser, googleAccount: GoogleAccount): User {
+        if (dbUser.photo == null) {
+            dbUser.photo = googleAccount.photoUrl
+            this.userRepo.save(dbUser)
+            this.events.publishEvent(ProfilePhotoEvent(User.from(dbUser)))
+        }
+        return User.from(dbUser)
     }
 
     fun hashPassword(password: Password): String {
@@ -118,5 +139,15 @@ class UserService(private val userRepo: UserRepo,
         dbUser.password = hashedNewPassword
         userRepo.save(dbUser)
         logger.info("Password reset successful: {}", email.value)
+    }
+
+    fun addProfilePhoto(photo: MultipartFile, principal: User): String {
+        val dbUser = this.findDbUser(principal.email)
+        this.storageService.delete(dbUser.photo?.substringAfterLast("/"))
+        val imageUrl = this.storageService.store(photo, principal.email.name())
+        dbUser.photo = imageUrl
+        this.userRepo.save(dbUser)
+        this.events.publishEvent(ProfilePhotoEvent(principal))
+        return imageUrl
     }
 }

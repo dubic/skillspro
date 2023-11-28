@@ -11,7 +11,7 @@ import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Component
 import org.springframework.web.filter.OncePerRequestFilter
 
-@Order(10)
+//@Order(10)
 @Component
 class AuthenticationFilter(private val sessionService: SessionService) : OncePerRequestFilter() {
 
@@ -19,7 +19,7 @@ class AuthenticationFilter(private val sessionService: SessionService) : OncePer
     override fun doFilterInternal(request: HttpServletRequest, response: HttpServletResponse, filterChain: FilterChain) {
         val authToken = getAuthToken(request)
         if (authToken == null) {
-            log.debug("No bearer token in header")
+            log.debug("No bearer token in header: ${request.servletPath}")
             filterChain.doFilter(request, response)
             return
         }
@@ -33,6 +33,7 @@ class AuthenticationFilter(private val sessionService: SessionService) : OncePer
         //set user in thread local
         SecurityContextHolder.getContext().authentication = UserAuthentication(true,
                 authToken, user)
+        log.debug("Authenticated: ${request.servletPath}")
         filterChain.doFilter(request, response)
     }
 

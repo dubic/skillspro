@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component
 @Component
 @ConfigurationProperties("sp")
 class ConfigProperties {
+    var applicationUrl = ""
     var rate = RateLimiter()
     var passwordForgotSubject = ""
     val mail = Mail()

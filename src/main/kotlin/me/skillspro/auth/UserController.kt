@@ -1,5 +1,6 @@
 package me.skillspro.auth
 
+import jakarta.servlet.http.HttpServletRequest
 import me.skillspro.auth.dto.AuthResponse
 import me.skillspro.auth.dto.CreateUserRequest
 import me.skillspro.auth.dto.CreateUserResponse
@@ -12,26 +13,24 @@ import me.skillspro.auth.tokens.models.Token
 import me.skillspro.auth.verification.AccountVerificationService
 import me.skillspro.auth.verification.EmailVerificationRequest
 import me.skillspro.core.BaseController
-import me.skillspro.core.config.ConfigProperties
-import org.springframework.http.HttpStatus
+import me.skillspro.core.Validations
 import org.springframework.http.ResponseEntity
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
+import org.springframework.web.context.request.RequestContextHolder
+import org.springframework.web.multipart.MultipartFile
 
 @RestController
 @RequestMapping("/users")
 class UserController(private val userService: UserService,
                      private val authService: AuthService,
-                     private val accountVerificationService: AccountVerificationService) : BaseController() {
+                     private val accountVerificationService: AccountVerificationService) :
+        BaseController() {
     @PostMapping
     fun createAccount(@RequestBody createUserRequest: CreateUserRequest): ResponseEntity<CreateUserResponse> {
         val user = User(
                 Name(createUserRequest.name),
-                Email(createUserRequest.email, false)
+                Email(createUserRequest.email, false),
+                null
         )
         val createUserResponse = this.userService.createAccount(user, Password(createUserRequest.password))
         return success(createUserResponse)
@@ -51,18 +50,31 @@ class UserController(private val userService: UserService,
         return ResponseEntity.ok().build()
     }
 
-    @GetMapping("/forgot-password/{email}")
+    @GetMapping("/password/forgot/{email}")
     fun forgotPassword(@PathVariable email: String): ResponseEntity<Any> {
         this.userService.forgotPassword(Email(email, null))
         return ResponseEntity.ok().build()
     }
 
-    @PostMapping("/reset-password")
+    @PostMapping("/password/reset")
     fun resetPassword(@RequestBody passwordResetRequest: PasswordResetRequest): ResponseEntity<Any> {
         val email = Email(passwordResetRequest.email, null)
         val password = Password(passwordResetRequest.newPassword)
         val token = Token(passwordResetRequest.token)
         this.userService.verifyTokenAndResetPassword(email, password, token)
         return ResponseEntity.ok().build()
+    }
+
+    @PostMapping("/photo")
+    fun addProfilePhoto(@RequestParam(name = "profile", required = false) photo:
+                        MultipartFile?,
+                        request: HttpServletRequest):
+            ResponseEntity<String> {
+        Validations.notNull(photo, "No photoUrl image found")
+        Validations.notContained(photo?.contentType, arrayOf("image/jpeg","image/png"), "png or " +
+                "jpeg expected")
+
+        val profileImageUrl = this.userService.addProfilePhoto(photo!!, principal())
+        return ResponseEntity.ok(profileImageUrl)
     }
 }

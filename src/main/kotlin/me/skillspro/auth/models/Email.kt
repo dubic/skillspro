@@ -14,4 +14,8 @@ class Email(email: String, val verified: Boolean?) {
     fun isVerified(): Boolean {
         return this.verified ?: false
     }
+
+    fun name(): String {
+        return this.value.substringBefore("@")
+    }
 }

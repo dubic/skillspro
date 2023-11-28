@@ -28,4 +28,10 @@ class RedisSessionRepo(private val jedisPool: JedisPool) {
             it.del(SessionUser.id(token))
         }
     }
+
+    fun extendExpiresWith(token: String, ttl: Long) {
+        jedisPool.resource.use {
+            it.expire(SessionUser.id(token), ttl)
+        }
+    }
 }

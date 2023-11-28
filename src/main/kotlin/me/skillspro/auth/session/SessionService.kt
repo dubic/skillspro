@@ -7,4 +7,5 @@ interface SessionService {
 
     fun userInSession(token: String): User?
     fun deleteSession(token: String)
+    fun extendSession(token: String)
 }

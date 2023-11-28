@@ -10,19 +10,11 @@ import me.skillspro.auth.models.Name
 import me.skillspro.auth.models.Password
 import me.skillspro.auth.models.User
 import me.skillspro.auth.verification.AccountVerificationService
-import org.hamcrest.MatcherAssert
 import org.hamcrest.MatcherAssert.assertThat
-import org.hamcrest.Matchers
 import org.hamcrest.Matchers.`is`
 import org.hamcrest.Matchers.notNullValue
 import org.junit.jupiter.api.Test
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.http.HttpStatus
-import org.springframework.test.web.servlet.MockMvc
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
-import org.springframework.test.web.servlet.result.MockMvcResultHandlers
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers
 
 //@WebMvcTest(UserController::class)
 class UserControllerTest {
@@ -41,7 +33,7 @@ class UserControllerTest {
     fun `create account`() {
         val userController = UserController(userService, authService, accountVerificationService)
         every {
-            userService.createAccount(User(Name(account1.name), Email(account1.email, null)),
+            userService.createAccount(User(Name(account1.name), Email(account1.email, null), null),
                     Password(account1.password)
             )
         } returns CreateUserResponse(false, 300)

@@ -26,10 +26,15 @@ class RedisSessionService(
             logger.warn("Session not found with token [...]")
             return null
         }
-        return User(Name(s.name), Email(s.email, s.verified))
+        extendSession(token)
+        return User(Name(s.name), Email(s.email, s.verified), null)
     }
 
     override fun deleteSession(token: String) {
         repo.delete(token)
+    }
+
+    override fun extendSession(token: String) {
+        repo.extendExpiresWith(token, configProperties.redisSessionTtlSecs)
     }
 }

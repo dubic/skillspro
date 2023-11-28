@@ -30,7 +30,7 @@ class RateLimiterFilter(private val rateLimiterService: RateLimiterService) : On
         if (path.matches("/auth/login".toRegex())) {
             return RateLimitRequest(request.remoteAddr, RateLimitType.LOGIN)
         }
-        if (path.matches("/users/reset-password".toRegex())) {
+        if (path.matches("/users/password/reset".toRegex())) {
             return RateLimitRequest(request.remoteAddr, RateLimitType.PASSWORD_RESET)
         }
         throw IllegalStateException("Rate limit filter should not filter: $path")

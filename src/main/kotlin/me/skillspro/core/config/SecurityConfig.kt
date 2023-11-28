@@ -22,6 +22,7 @@ class SecurityConfig(private val authenticationFilter: AuthenticationFilter) {
     @Bean
     fun filterChain(http: HttpSecurity): SecurityFilterChain {
         http
+                .sessionManagement { it.disable() }
                 .csrf { it.disable() }
                 .exceptionHandling {
                     it.authenticationEntryPoint { req, resp, authException ->
@@ -29,8 +30,11 @@ class SecurityConfig(private val authenticationFilter: AuthenticationFilter) {
                     }
                 }
                 .authorizeHttpRequests {
-                    it.requestMatchers("/users/**",
+                    it.requestMatchers("/users", "/users/verify/**", "/users/password/**",
+                            "/data/**",
+                            "/error",
                             "/auth/**", "/engagements/**", "/notification/**").permitAll()
+                            .anyRequest().fullyAuthenticated()
                 }
                 .headers { h -> h.frameOptions { it.deny() } }
                 .addFilterBefore(authenticationFilter, UsernamePasswordAuthenticationFilter::class.java)
