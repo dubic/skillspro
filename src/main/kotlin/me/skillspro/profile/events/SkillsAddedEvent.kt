@@ -1,7 +1,7 @@
 package me.skillspro.profile.events
 
 import me.skillspro.profile.models.Profile
-import me.skillspro.profile.models.Skill
+import me.skillspro.profile.models.Skills
 
-class SkillsAddedEvent(profile: Profile, oldSkills: Set<Skill>, newSkills: Set<Skill>) {
+class SkillsAddedEvent(profile: Profile, oldSkills: Skills, newSkills: Skills) {
 }
