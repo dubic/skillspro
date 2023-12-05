@@ -3,6 +3,8 @@ package me.skillspro.auth.engage
 import me.skillspro.auth.engage.data.Engagement
 import me.skillspro.auth.models.User
 import me.skillspro.auth.verification.AccountVerifiedEvent
+import me.skillspro.profile.events.SkillsAddedEvent
+import me.skillspro.profile.models.Profile
 import org.slf4j.LoggerFactory
 import org.springframework.context.event.EventListener
 import org.springframework.data.repository.findByIdOrNull
@@ -25,6 +27,26 @@ class EngagementService(private val engagementRepo: EngagementRepo) {
     fun onAccountVerified(accountVerifiedEvent: AccountVerifiedEvent) {
         logger.info("Event :: account verified :: engagement :: ${accountVerifiedEvent.user.email}")
         this.accountVerifiedEngagement(accountVerifiedEvent.user)
+    }
+
+    @Async
+    @EventListener
+    fun onSkillsAdded(skillsAddedEvent: SkillsAddedEvent) {
+        logger.info("Event :: skills added :: engagement :: {}. Old: {}, New: {}",
+                skillsAddedEvent.profile.email.value, skillsAddedEvent.oldSkills,
+                skillsAddedEvent.newSkills)
+        if (skillsAddedEvent.isFirstTime()){
+            this.skillsAdded(skillsAddedEvent.profile)
+        }
+    }
+
+    private fun skillsAdded(profile: Profile) {
+        val engagement = this.engagementRepo.findByIdOrNull(profile.email.value)
+                ?: Engagement(profile.email.value)
+        engagement.skills = true
+        this.engagementRepo.save(engagement)
+        logger.info("account engagement [skills=${engagement.skills}] saved for : ${profile.email
+                .value}")
     }
 
     private fun accountVerifiedEngagement(user: User) {

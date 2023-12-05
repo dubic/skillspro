@@ -3,5 +3,6 @@ package me.skillspro.profile.events
 import me.skillspro.profile.models.Profile
 import me.skillspro.profile.models.Skills
 
-class SkillsAddedEvent(profile: Profile, oldSkills: Skills, newSkills: Skills) {
+data class SkillsAddedEvent(val profile: Profile, val oldSkills: Skills, val newSkills: Skills) {
+    fun isFirstTime() = oldSkills.isEmpty() && !newSkills.isEmpty()
 }

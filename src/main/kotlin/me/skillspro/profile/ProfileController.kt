@@ -14,6 +14,9 @@ class ProfileController(private val profileService: ProfileService) : BaseContro
 
     @PostMapping("/skills/add")
     fun addSkills(@RequestBody skillNames: List<String>): ResponseEntity<Any> {
+        if (skillNames.isEmpty()) {
+            return ResponseEntity.noContent().build()
+        }
         this.profileService.addSkills(Skills(skillNames), principal())
         return ResponseEntity.ok().build()
     }

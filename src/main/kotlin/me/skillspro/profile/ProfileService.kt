@@ -19,11 +19,12 @@ class ProfileService(private val profileRepo: ProfileRepo,
     fun addSkills(newSkills: Skills, principal: User) {
         log.debug("[{}] adding skills {}", principal.email.value, newSkills)
         val dbProfile = this.getDBProfile(principal.email)
-        val oldSkills = dbProfile.skillsValues()
+        val skillsAddedEvent = SkillsAddedEvent(Profile.from(dbProfile), dbProfile.skillsValues(), newSkills)
+//        log.debug("[{}] Old {}", principal.email.value, oldSkills)
         dbProfile.addToSkills(newSkills)
         this.profileRepo.save(dbProfile)
         log.debug("[{}] added to skills {}", principal.email.value, newSkills)
-        events.publishEvent(SkillsAddedEvent(Profile.from(dbProfile), oldSkills, newSkills))
+        events.publishEvent(skillsAddedEvent)
     }
 
     private fun getDBProfile(email: Email): DbProfile {

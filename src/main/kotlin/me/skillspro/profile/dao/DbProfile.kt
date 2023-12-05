@@ -12,7 +12,7 @@ class DbProfile (@field:Id var email: String,
     }
 
     fun skillsValues(): Skills {
-        return Skills(skills)
+        return Skills(skills.map { it }.toSet())
     }
 
 }
