@@ -1,6 +1,7 @@
 package me.skillspro.auth.engage
 
 import me.skillspro.auth.engage.data.Engagement
+import me.skillspro.auth.engage.data.ProfilePhotoEvent
 import me.skillspro.auth.models.User
 import me.skillspro.auth.verification.AccountVerifiedEvent
 import me.skillspro.profile.events.SkillsAddedEvent
@@ -31,13 +32,29 @@ class EngagementService(private val engagementRepo: EngagementRepo) {
 
     @Async
     @EventListener
+    fun onProfileImage(event: ProfilePhotoEvent) {
+        logger.info("Event :: Profile image :: engagement :: ${event.user.email.value}")
+        this.profileImageEngagement(event.user)
+    }
+
+    @Async
+    @EventListener
     fun onSkillsAdded(skillsAddedEvent: SkillsAddedEvent) {
         logger.info("Event :: skills added :: engagement :: {}. Old: {}, New: {}",
                 skillsAddedEvent.profile.email.value, skillsAddedEvent.oldSkills,
                 skillsAddedEvent.newSkills)
-        if (skillsAddedEvent.isFirstTime()){
+        if (skillsAddedEvent.isFirstTime()) {
             this.skillsAdded(skillsAddedEvent.profile)
         }
+    }
+
+    private fun profileImageEngagement(user: User) {
+        val engagement = this.engagementRepo.findByIdOrNull(user.email.value)
+                ?: Engagement(user.email.value)
+        engagement.image = true
+        engagementRepo.save(engagement)
+        logger.info("Profile image engagement [image=${engagement.image}] saved for" +
+                " : {}", user.email.value)
     }
 
     private fun skillsAdded(profile: Profile) {
@@ -45,8 +62,10 @@ class EngagementService(private val engagementRepo: EngagementRepo) {
                 ?: Engagement(profile.email.value)
         engagement.skills = true
         this.engagementRepo.save(engagement)
-        logger.info("account engagement [skills=${engagement.skills}] saved for : ${profile.email
-                .value}")
+        logger.info("account engagement [skills=${engagement.skills}] saved for : ${
+            profile.email
+                    .value
+        }")
     }
 
     private fun accountVerifiedEngagement(user: User) {
@@ -54,8 +73,10 @@ class EngagementService(private val engagementRepo: EngagementRepo) {
                 ?: Engagement(user.email.value)
         engagement.verified = true
         this.engagementRepo.save(engagement)
-        logger.info("account engagement [verified=${engagement.verified}] saved for : ${user.email
-                .value}")
+        logger.info("account engagement [verified=${engagement.verified}] saved for : ${
+            user.email
+                    .value
+        }")
     }
 
     private fun accountCreatedEngagement(user: User) {
