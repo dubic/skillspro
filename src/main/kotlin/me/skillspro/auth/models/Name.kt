@@ -11,4 +11,8 @@ class Name(value: String) {
         onlyAlphabets(value, "name must be alphabets only: $value")
         this.value = value.trim()
     }
+
+    override fun toString(): String {
+        return "Name(value='$value')"
+    }
 }
