@@ -6,6 +6,8 @@ import me.skillspro.auth.models.User
 import me.skillspro.auth.verification.AccountVerifiedEvent
 import me.skillspro.profile.events.SkillsAddedEvent
 import me.skillspro.profile.models.Profile
+import me.skillspro.projects.events.ProjectAddedEvent
+import me.skillspro.projects.models.Project
 import org.slf4j.LoggerFactory
 import org.springframework.context.event.EventListener
 import org.springframework.data.repository.findByIdOrNull
@@ -46,6 +48,23 @@ class EngagementService(private val engagementRepo: EngagementRepo) {
         if (skillsAddedEvent.isFirstTime()) {
             this.skillsAdded(skillsAddedEvent.profile)
         }
+    }
+
+    @Async
+    @EventListener
+    fun onProjectAdded(projectAddedEvent: ProjectAddedEvent) {
+        logger.info("Event :: project added :: engagement :: {}. title: {}",
+                projectAddedEvent.project.owner.email.value, projectAddedEvent.project.title)
+        this.projectAdded(projectAddedEvent.project)
+    }
+
+    private fun projectAdded(project: Project) {
+        val engagement = this.engagementRepo.findByIdOrNull(project.owner.email.value)
+                ?: Engagement(project.owner.email.value)
+        engagement.projects = true
+        engagementRepo.save(engagement)
+        logger.info("Project added engagement [project=${engagement.projects}] saved for" +
+                " : {}", project.owner.email.value)
     }
 
     private fun profileImageEngagement(user: User) {
