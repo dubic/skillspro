@@ -1,6 +1,7 @@
 package me.skillspro.profile
 
 import me.skillspro.core.BaseController
+import me.skillspro.profile.data.ProfileDetails
 import me.skillspro.profile.models.Skills
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.PostMapping
@@ -18,6 +19,12 @@ class ProfileController(private val profileService: ProfileService) : BaseContro
             return ResponseEntity.noContent().build()
         }
         this.profileService.addSkills(Skills(skillNames), principal())
+        return ResponseEntity.ok().build()
+    }
+
+    @PostMapping
+    fun addDetails(@RequestBody profileDetails: ProfileDetails): ResponseEntity<Any> {
+        this.profileService.saveDetails(profileDetails, principal())
         return ResponseEntity.ok().build()
     }
 }

@@ -5,8 +5,11 @@ import org.springframework.data.annotation.Id
 import org.springframework.data.mongodb.core.mapping.Document
 
 @Document
-class DbProfile (@field:Id var email: String,
-                 var skills: MutableSet<String>) {
+class DbProfile(@field:Id var email: String,
+                var phone: String?,
+                var ig: String?,
+                var location: String?,
+                var skills: MutableSet<String>) {
     fun addToSkills(newSkills: Skills) {
         newSkills.set().forEach { skills.add(it) }
     }

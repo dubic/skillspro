@@ -4,6 +4,7 @@ import me.skillspro.auth.models.Email
 import me.skillspro.auth.models.User
 import me.skillspro.profile.dao.DbProfile
 import me.skillspro.profile.dao.ProfileRepo
+import me.skillspro.profile.data.ProfileDetails
 import me.skillspro.profile.events.SkillsAddedEvent
 import me.skillspro.profile.models.Profile
 import me.skillspro.profile.models.Skills
@@ -29,6 +30,14 @@ class ProfileService(private val profileRepo: ProfileRepo,
 
     private fun getDBProfile(email: Email): DbProfile {
         return profileRepo.findByIdOrNull(email.value)
-                ?: DbProfile(email.value, mutableSetOf())
+                ?: DbProfile(email.value, null, null, null, mutableSetOf())
+    }
+
+    fun saveDetails(profileDetails: ProfileDetails, principal: User) {
+        val dbProfile = this.getDBProfile(principal.email)
+        dbProfile.ig = profileDetails.instagram
+        dbProfile.phone = profileDetails.phone
+        dbProfile.location = profileDetails.location
+        this.profileRepo.save(dbProfile)
     }
 }
