@@ -33,7 +33,8 @@ class SecurityConfig(private val authenticationFilter: AuthenticationFilter) {
                     it.requestMatchers("/users", "/users/verify/**", "/users/password/**",
                             "/data/**",
                             "/error",
-                            "/auth/**", "/engagements/**", "/notification/**").permitAll()
+                            "/auth/**", "/engagements/**", "/notification/**", "/content/**")
+                        .permitAll()
                             .anyRequest().fullyAuthenticated()
                 }
                 .headers { h -> h.frameOptions { it.deny() } }

@@ -7,7 +7,7 @@ import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Service
 
 @Service
-@Profile("e2e")
+@Profile("e2e", "default")
 class LoggerEmailService : IMailService{
     private val logger = LoggerFactory.getLogger(javaClass)
     private val map: MutableMap<String, String> = mutableMapOf()

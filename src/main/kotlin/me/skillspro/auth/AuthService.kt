@@ -31,11 +31,13 @@ class AuthService(
         if (!user.isVerified()) {
             logger.warn("Attempted login with unverified account: [{}]", user.email.value)
             this.verificationService.resendVerification(user.email)
-            return AuthResponse("", Account(user.name.value, user.email.value, user.isVerified()))
+            return AuthResponse("", Account(user.name.value, user.email.value, user.isVerified(),
+                user.photoUrl))
         }
         val authToken = this.createAuthenticationToken(user)
         this.sessionService.createSession(authToken, user)
-        return AuthResponse(authToken, Account(user.name.value, user.email.value, user.isVerified()))
+        return AuthResponse(authToken, Account(user.name.value, user.email.value, user.isVerified
+            (), user.photoUrl))
     }
 
     fun validateAccount(email: Email, password: Password): User {
@@ -72,7 +74,8 @@ class AuthService(
     private fun createAuthenticationSession(user: User): AuthResponse {
         val token = this.createAuthenticationToken(user)
         this.sessionService.createSession(token, user)
-        return AuthResponse(token, Account(user.name.value, user.email.value, user.isVerified()))
+        return AuthResponse(token, Account(user.name.value, user.email.value, user.isVerified(),
+            user.photoUrl))
     }
 
     fun loginSocial(socialLoginRequest: SocialLoginRequest): AuthResponse {

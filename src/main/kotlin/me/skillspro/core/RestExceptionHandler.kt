@@ -35,6 +35,7 @@ class RestExceptionHandler {
     @ExceptionHandler(Exception::class)
     fun handleNoSuchElementException(e: Exception): ProblemDetail {
         logger.error(e.message, e)
-        return ProblemDetail.forStatusAndDetail(HttpStatus.INTERNAL_SERVER_ERROR, e.message!!)
+        return ProblemDetail.forStatusAndDetail(HttpStatus.INTERNAL_SERVER_ERROR, "Server error " +
+                "occurred")
     }
 }

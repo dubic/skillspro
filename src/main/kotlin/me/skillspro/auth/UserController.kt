@@ -71,8 +71,8 @@ class UserController(private val userService: UserService,
                         request: HttpServletRequest):
             ResponseEntity<String> {
         Validations.notNull(photo, "No photo image found")
-        Validations.notContained(photo?.contentType, arrayOf("image/jpeg","image/png"), "png or " +
-                "jpeg expected")
+//        Validations.notContained(photo?.contentType, arrayOf("image/jpeg","image/png"), "png or " +
+//                "jpeg expected")
 
         val profileImageUrl = this.userService.addProfilePhoto(photo!!, principal())
         return ResponseEntity.ok(profileImageUrl)

@@ -13,6 +13,7 @@ import org.springframework.context.event.EventListener
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Service
+import java.time.LocalDateTime
 
 @Service
 class EngagementService(private val engagementRepo: EngagementRepo) {
@@ -61,7 +62,7 @@ class EngagementService(private val engagementRepo: EngagementRepo) {
     private fun projectAdded(project: Project) {
         val engagement = this.engagementRepo.findByIdOrNull(project.owner.email.value)
                 ?: Engagement(project.owner.email.value)
-        engagement.projects = true
+        engagement.projects = LocalDateTime.now()
         engagementRepo.save(engagement)
         logger.info("Project added engagement [project=${engagement.projects}] saved for" +
                 " : {}", project.owner.email.value)
@@ -79,7 +80,7 @@ class EngagementService(private val engagementRepo: EngagementRepo) {
     private fun skillsAdded(profile: Profile) {
         val engagement = this.engagementRepo.findByIdOrNull(profile.email.value)
                 ?: Engagement(profile.email.value)
-        engagement.skills = true
+        engagement.skills = LocalDateTime.now()
         this.engagementRepo.save(engagement)
         logger.info("account engagement [skills=${engagement.skills}] saved for : ${
             profile.email

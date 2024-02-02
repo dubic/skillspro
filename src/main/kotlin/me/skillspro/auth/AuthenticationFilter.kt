@@ -26,7 +26,7 @@ class AuthenticationFilter(private val sessionService: SessionService) : OncePer
         //get user in session
         val user = this.sessionService.userInSession(authToken)
         if (user == null) {
-            log.debug("Session does not exist")
+            log.debug("Session does not exist: ${request.servletPath}")
             filterChain.doFilter(request, response)
             return
         }
